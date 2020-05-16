@@ -66,3 +66,40 @@ After applying calibration, thresholding, and a perspective transform to a road 
   <b>Image with the calculated radius of curvature, offset and lanes lines</b><br>
   <img src="https://static.wixstatic.com/media/bb5837_6b0be90dc3c449a189121615d710bfe1~mv2.jpg/v1/fill/w_1280,h_720,al_c,q_90/Lane_lines_Image.jpg">
 </p>
+
+## Sliding window method
+
+The Sliding window method starts with plotting a histogram of where the binary activations occur across the image. The peaks in the histogram in the image represents the starting point for where to search for the lines.
+ 
+The first peak in the histogram has a width index value less than half of the width of the binary warped image which means that this will be the starting point for the left lane. As the second peak in the histogram has a width index value greater than half of the width of the binary warped image, it represents the starting point for the right lane.
+
+<p align="center">
+  <b>Histogram to find the starting point of the lane lines</b><br>
+  <img src="https://static.wixstatic.com/media/bb5837_6aec5b27f7c34d7ea511a462f4068f9e~mv2.png/v1/fill/w_1584,h_902,al_c/Screen%20Shot%202020-04-13%20at%2012_49_42%20AM_pn.png">
+</p>
+ 
+After getting the starting point for the left and right lanes, the sliding window method can be applied. The sliding window method requires hyper-parameters like the number of windows per frame, margin to set the width of the windows and the minimum number of pixels that need to be found to recenter the window. The height of the window will be equal to binary image height divided by the number of windows. After initializing the necessary hyper-parameters, the algorithm loops for every window, with the given window sliding left or right if it finds the mean position of activated pixels within the window to have shifted. 
+
+After getting the pixels belonging to each line through the sliding window method, the last step is to fit a polynomial to both the lines using NumPy's polyfit function in python. 
+
+<p align="center">
+  <b>Sliding window method applied to a binary warped image</b><br>
+  <img src="https://static.wixstatic.com/media/bb5837_92eaddeda7f04617ba24c3104d375c44~mv2.png/v1/fill/w_1616,h_898,al_c/Screen%20Shot%202020-04-13%20at%201_06_36%20AM.png">
+</p>
+
+## Radius of curvature and offset calculation
+
+**Radius of Curvature: -**
+The given image shows the second-order polynomial obtained by the Sliding window method. The radius of curvature for this second-order polynomial is calculated using the formula R = (1+(2Ay+B)^2)^(3/2))/abs(2A).
+
+**Offset Calculation: -**
+The first step to calculate the offset of the vehicle from the center is to find the camera center. The camera center is the average of the x-coordinates of the base pixels of the left lane and right lane in a given frame. The difference between the camera center value and half of the width of the binary warped image is known as the offset from the center. If the offset value is less than zero, then the vehicle has an offset towards the right whereas if the offset value is greater than zero, then the vehicle has an offset towards the left.
+
+<p align="center">
+  <b>Second-order polynomial obtained by Sliding Window method</b><br>
+  <img src="https://static.wixstatic.com/media/bb5837_dc1003e43bcc4d6190318b00cfa73c2e~mv2.png/v1/fill/w_1590,h_902,al_c/Screen%20Shot%202020-04-13%20at%2012_50_56%20AM_pn.png">
+</p>
+
+## Output: Detecting Lanes lines in the video
+
+The video titled "project_video_output.mp4" shows the result obtained while testing the software pipeline developed to identify the lane boundaries in a video from a front-facing camera mounted on the vehicle. 
